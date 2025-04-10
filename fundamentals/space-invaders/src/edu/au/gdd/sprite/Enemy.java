@@ -1,7 +1,7 @@
 package edu.au.gdd.sprite;
 
+import static edu.au.gdd.Global.*;
 import javax.swing.ImageIcon;
-import edu.au.gdd.Global;
 
 public class Enemy extends Sprite {
 
@@ -19,11 +19,12 @@ public class Enemy extends Sprite {
 
         bomb = new Bomb(x, y);
 
-        var enemyImg = "src/images/alien.png";
-        var ii = new ImageIcon(enemyImg);
+        var ii = new ImageIcon(IMG_ENEMY);
 
         // Scale the image to use the global scaling factor
-        var scaledImage = ii.getImage().getScaledInstance(ii.getIconWidth() * Global.SCALE_FACTOR, ii.getIconHeight() * Global.SCALE_FACTOR, java.awt.Image.SCALE_SMOOTH);
+        var scaledImage = ii.getImage().getScaledInstance(ii.getIconWidth() * SCALE_FACTOR,
+                ii.getIconHeight() * SCALE_FACTOR,
+                java.awt.Image.SCALE_SMOOTH);
         setImage(scaledImage);
     }
 

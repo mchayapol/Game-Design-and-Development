@@ -1,13 +1,9 @@
 package edu.au.gdd.scene;
 
-import edu.au.gdd.Global;
+import static edu.au.gdd.Global.*;
 import edu.au.gdd.sprite.Enemy;
 import edu.au.gdd.sprite.Player;
 import edu.au.gdd.sprite.Shot;
-
-import javax.swing.ImageIcon;
-import javax.swing.JPanel;
-import javax.swing.Timer;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -18,26 +14,27 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import javax.swing.ImageIcon;
+import javax.swing.JPanel;
+import javax.swing.Timer;
 
-public class Scene1 extends JPanel {
-
-    private Dimension d;
+public class Scene1 extends JPanel {   
     private List<Enemy> enemies;
     private Player player;
     private Shot shot;
     
     private int direction = -1;
     private int deaths = 0;
-
+    
     private boolean inGame = true;
-    private String explImg = "src/images/explosion.png";
     private String message = "Game Over";
+    
+    private final Dimension d = new Dimension(BOARD_WIDTH, BOARD_HEIGHT);
+    private final Random randomizer = new Random();
 
     private Timer timer;
-
 
     public Scene1() {
 
@@ -49,15 +46,13 @@ public class Scene1 extends JPanel {
 
         addKeyListener(new TAdapter());
         setFocusable(true);
-        d = new Dimension(Global.BOARD_WIDTH, Global.BOARD_HEIGHT);
         setBackground(Color.black);
 
-        timer = new Timer(Global.DELAY, new GameCycle());
+        timer = new Timer(DELAY, new GameCycle());
         timer.start();
 
         gameInit();
     }
-
 
     private void gameInit() {
 
@@ -66,8 +61,8 @@ public class Scene1 extends JPanel {
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 6; j++) {
 
-                var enemy = new Enemy(Global.ALIEN_INIT_X + (Global.ALIEN_WIDTH + Global.ALIEN_GAP) * j,
-                        Global.ALIEN_INIT_Y + (Global.ALIEN_HEIGHT + Global.ALIEN_GAP) * i);
+                var enemy = new Enemy(ALIEN_INIT_X + (ALIEN_WIDTH + ALIEN_GAP) * j,
+                        ALIEN_INIT_Y + (ALIEN_HEIGHT + ALIEN_GAP) * i);
                 enemies.add(enemy);
             }
         }
@@ -142,8 +137,8 @@ public class Scene1 extends JPanel {
 
         if (inGame) {
 
-            g.drawLine(0, Global.GROUND,
-                    Global.BOARD_WIDTH, Global.GROUND);
+            g.drawLine(0, GROUND,
+                    BOARD_WIDTH, GROUND);
 
             drawAliens(g);
             drawPlayer(g);
@@ -165,26 +160,25 @@ public class Scene1 extends JPanel {
     private void gameOver(Graphics g) {
 
         g.setColor(Color.black);
-        g.fillRect(0, 0, Global.BOARD_WIDTH, Global.BOARD_HEIGHT);
+        g.fillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
 
         g.setColor(new Color(0, 32, 48));
-        g.fillRect(50, Global.BOARD_WIDTH / 2 - 30, Global.BOARD_WIDTH - 100, 50);
+        g.fillRect(50, BOARD_WIDTH / 2 - 30, BOARD_WIDTH - 100, 50);
         g.setColor(Color.white);
-        g.drawRect(50, Global.BOARD_WIDTH / 2 - 30, Global.BOARD_WIDTH - 100, 50);
+        g.drawRect(50, BOARD_WIDTH / 2 - 30, BOARD_WIDTH - 100, 50);
 
         var small = new Font("Helvetica", Font.BOLD, 14);
         var fontMetrics = this.getFontMetrics(small);
 
         g.setColor(Color.white);
         g.setFont(small);
-        g.drawString(message, (Global.BOARD_WIDTH - fontMetrics.stringWidth(message)) / 2,
-                Global.BOARD_WIDTH / 2);
+        g.drawString(message, (BOARD_WIDTH - fontMetrics.stringWidth(message)) / 2,
+                BOARD_WIDTH / 2);
     }
 
     private void update() {
 
-        if (deaths == Global.NUMBER_OF_ALIENS_TO_DESTROY) {
-
+        if (deaths == NUMBER_OF_ALIENS_TO_DESTROY) {
             inGame = false;
             timer.stop();
             message = "Game won!";
@@ -195,27 +189,25 @@ public class Scene1 extends JPanel {
 
         // shot
         if (shot.isVisible()) {
-
             int shotX = shot.getX();
             int shotY = shot.getY();
 
             for (Enemy enemy : enemies) {
-
+                // Collision detection: shot and enemy
                 int enemyX = enemy.getX();
                 int enemyY = enemy.getY();
 
-                if (enemy.isVisible() && shot.isVisible()) {
-                    if (shotX >= (enemyX)
-                            && shotX <= (enemyX + Global.ALIEN_WIDTH)
-                            && shotY >= (enemyY)
-                            && shotY <= (enemyY + Global.ALIEN_HEIGHT)) {
+                if (enemy.isVisible() && shot.isVisible()
+                        && shotX >= (enemyX)
+                        && shotX <= (enemyX + ALIEN_WIDTH)
+                        && shotY >= (enemyY)
+                        && shotY <= (enemyY + ALIEN_HEIGHT)) {
 
-                        var ii = new ImageIcon(explImg);
-                        enemy.setImage(ii.getImage());
-                        enemy.setDying(true);
-                        deaths++;
-                        shot.die();
-                    }
+                    var ii = new ImageIcon(IMG_EXPLOSION);
+                    enemy.setImage(ii.getImage());
+                    enemy.setDying(true);
+                    deaths++;
+                    shot.die();
                 }
             }
 
@@ -230,49 +222,35 @@ public class Scene1 extends JPanel {
         }
 
         // enemies
-
         for (Enemy enemy : enemies) {
 
             int x = enemy.getX();
 
-            if (x >= Global.BOARD_WIDTH - Global.BORDER_RIGHT && direction != -1) {
+            if (x >= BOARD_WIDTH - BORDER_RIGHT && direction != -1) {
 
                 direction = -1;
 
-                Iterator<Enemy> i1 = enemies.iterator();
-
-                while (i1.hasNext()) {
-
-                    Enemy e2 = i1.next();
-                    e2.setY(e2.getY() + Global.GO_DOWN);
+                for (Enemy e2 : enemies) {
+                    e2.setY(e2.getY() + GO_DOWN);
                 }
             }
 
-            if (x <= Global.BORDER_LEFT && direction != 1) {
+            if (x <= BORDER_LEFT && direction != 1) {
 
                 direction = 1;
 
-                Iterator<Enemy> i2 = enemies.iterator();
-
-                while (i2.hasNext()) {
-
-                    Enemy e = i2.next();
-                    e.setY(e.getY() + Global.GO_DOWN);
+                for (Enemy e : enemies) {
+                    e.setY(e.getY() + GO_DOWN);
                 }
             }
         }
 
-        Iterator<Enemy> it = enemies.iterator();
-
-        while (it.hasNext()) {
-
-            Enemy enemy = it.next();
-
+        for (Enemy enemy : enemies) {
             if (enemy.isVisible()) {
 
                 int y = enemy.getY();
 
-                if (y > Global.GROUND - Global.ALIEN_HEIGHT) {
+                if (y > GROUND - ALIEN_HEIGHT) {
                     inGame = false;
                     message = "Invasion!";
                 }
@@ -282,14 +260,12 @@ public class Scene1 extends JPanel {
         }
 
         // bombs
-        var generator = new Random();
-
         for (Enemy enemy : enemies) {
 
-            int shot = generator.nextInt(15);
+            int chance = randomizer.nextInt(15);
             Enemy.Bomb bomb = enemy.getBomb();
 
-            if (shot == Global.CHANCE && enemy.isVisible() && bomb.isDestroyed()) {
+            if (chance == CHANCE && enemy.isVisible() && bomb.isDestroyed()) {
 
                 bomb.setDestroyed(false);
                 bomb.setX(enemy.getX());
@@ -301,26 +277,21 @@ public class Scene1 extends JPanel {
             int playerX = player.getX();
             int playerY = player.getY();
 
-            if (player.isVisible() && !bomb.isDestroyed()) {
+            if (player.isVisible() && !bomb.isDestroyed()
+                    && bombX >= (playerX)
+                    && bombX <= (playerX + PLAYER_WIDTH)
+                    && bombY >= (playerY)
+                    && bombY <= (playerY + PLAYER_HEIGHT)) {
 
-                if (bombX >= (playerX)
-                        && bombX <= (playerX + Global.PLAYER_WIDTH)
-                        && bombY >= (playerY)
-                        && bombY <= (playerY + Global.PLAYER_HEIGHT)) {
-
-                    var ii = new ImageIcon(explImg);
-                    player.setImage(ii.getImage());
-                    player.setDying(true);
-                    bomb.setDestroyed(true);
-                }
+                var ii = new ImageIcon(IMG_EXPLOSION);
+                player.setImage(ii.getImage());
+                player.setDying(true);
+                bomb.setDestroyed(true);
             }
 
             if (!bomb.isDestroyed()) {
-
                 bomb.setY(bomb.getY() + 1);
-
-                if (bomb.getY() >= Global.GROUND - Global.BOMB_HEIGHT) {
-
+                if (bomb.getY() >= GROUND - BOMB_HEIGHT) {
                     bomb.setDestroyed(true);
                 }
             }
@@ -328,7 +299,6 @@ public class Scene1 extends JPanel {
     }
 
     private void doGameCycle() {
-
         update();
         repaint();
     }
@@ -337,7 +307,6 @@ public class Scene1 extends JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-
             doGameCycle();
         }
     }
@@ -360,16 +329,10 @@ public class Scene1 extends JPanel {
 
             int key = e.getKeyCode();
 
-            if (key == KeyEvent.VK_SPACE) {
-
-                if (inGame) {
-
-                    if (!shot.isVisible()) {
-
-                        shot = new Shot(x, y);
-                    }
-                }
+            if (key == KeyEvent.VK_SPACE && inGame && !shot.isVisible()) {
+                shot = new Shot(x, y);
             }
+
         }
     }
 }

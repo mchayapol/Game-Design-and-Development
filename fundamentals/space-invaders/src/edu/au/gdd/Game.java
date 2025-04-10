@@ -3,9 +3,9 @@ package edu.au.gdd;
 import edu.au.gdd.scene.Scene1;
 import javax.swing.JFrame;
 
-public class SpaceInvaders extends JFrame  {
+public class Game extends JFrame  {
 
-    public SpaceInvaders() {
+    public Game() {
         initUI();
     }
 

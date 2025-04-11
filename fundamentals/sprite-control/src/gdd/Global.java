@@ -1,4 +1,4 @@
-package edu.au.gdd;
+package gdd;
 
 public class Global {
     private Global() {
@@ -15,12 +15,6 @@ public class Global {
     public static final int GROUND = 580; // Doubled from 290
     public static final int BOMB_HEIGHT = 10; // Doubled from 5
 
-    public static final int ALIEN_HEIGHT = 24; // Doubled from 12
-    public static final int ALIEN_WIDTH = 24; // Doubled from 12
-    public static final int ALIEN_INIT_X = 300; // Doubled from 150
-    public static final int ALIEN_INIT_Y = 10; // Doubled from 5
-    public static final int ALIEN_GAP = 30; // Gap between aliens
-
     public static final int GO_DOWN = 30; // Doubled from 15
     public static final int NUMBER_OF_ALIENS_TO_DESTROY = 24;
     public static final int CHANCE = 5;
@@ -29,8 +23,7 @@ public class Global {
     public static final int PLAYER_HEIGHT = 20; // Doubled from 10
 
     // Images
-    public static final String IMG_ENEMY = "src/images/alien.png";
-    public static final String IMG_PLAYER = "src/images/player.png";
-    public static final String IMG_SHOT = "src/images/shot.png";
-    public static final String IMG_EXPLOSION = "src/images/explosion.png";
+    public static final String IMG_PLAYER = "src/images/megaman-sprite.png";
+    // public static final String IMG_SHOT = "src/images/shot.png";
+
 }

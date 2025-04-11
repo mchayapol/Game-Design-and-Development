@@ -1,4 +1,4 @@
-package edu.au.gdd;
+package gdd;
 
 import java.awt.EventQueue;
 

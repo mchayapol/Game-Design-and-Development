@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "gdd.Main",
+            "projectName": "sprite-control_c2f53ddf"
+        },
+        {
+            "type": "java",
             "name": "Current File",
             "request": "launch",
             "mainClass": "${file}"
@@ -14,7 +21,7 @@
             "type": "java",
             "name": "Main",
             "request": "launch",
-            "mainClass": "edu.au.gdd.Main",
+            "mainClass": "gdd.Main",
             "projectName": "space-invaders_a0edba0"
         }
     ]

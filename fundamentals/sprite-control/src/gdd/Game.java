@@ -1,6 +1,6 @@
-package edu.au.gdd;
+package gdd;
 
-import edu.au.gdd.scene.Scene1;
+import gdd.scene.Scene1;
 import javax.swing.JFrame;
 
 public class Game extends JFrame  {

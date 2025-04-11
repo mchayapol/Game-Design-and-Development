@@ -1,32 +1,14 @@
-# Space Invaders
-## References
-[Space Invader](https://github.com/janbodnar/Java-Space-Invaders)
-
-A classic Space Invaders game implementation in Java using Swing for the graphical interface.
+# Megaman Sprite Rendering
 
 ## Description
 
-This is a Java implementation of the classic arcade game Space Invaders. Players control a spaceship at the bottom of the screen and must defend against waves of descending alien invaders. The game features:
+This project demonstrates how to render a Megaman sprite by clipping the image from a source image. It focuses on sprite rendering techniques and does not include gameplay mechanics.
 
-- Player-controlled spaceship that moves left and right
-- Multiple rows of alien enemies that move across and down the screen
-- Shooting mechanics to destroy aliens
-- Enemy bombs that can destroy the player
-- Score tracking through alien kills
-- Game over conditions for both victory and defeat
+## Features
 
-## Controls
-
-- **Left Arrow**: Move spaceship left
-- **Right Arrow**: Move spaceship right
-- **Space**: Fire weapon
-
-## Game Rules
-
-- Destroy all aliens (24 in total) to win the game
-- Avoid enemy bombs
-- Don't let aliens reach the ground, or it's game over
-- Player dies if hit by an enemy bomb
+- Clipping a specific sprite from a source image
+- Rendering the clipped sprite on a graphical interface
+- Basic setup for sprite-based rendering in Java
 
 ## Project Structure
 
@@ -34,29 +16,25 @@ This is a Java implementation of the classic arcade game Space Invaders. Players
 src/
 ├── edu/au/gdd/
 │   ├── Global.java         # Game constants and configuration
-│   ├── Main.java          # Game entry point
-│   ├── SpaceInvaders.java # Main game window setup
-│   └── sprite/
-│       ├── Enemy.java     # Enemy alien implementation
-│       ├── Player.java    # Player spaceship implementation
-│       ├── Shot.java      # Projectile implementation
-│       └── Sprite.java    # Base sprite class
+│   ├── Main.java           # Application entry point
+│   ├── SpriteRenderer.java # Handles sprite rendering logic
+│   └── assets/
+│       └── megaman.png     # Source image containing Megaman sprites
 ```
 
 ## Technical Details
 
 - Built with Java and Swing
 - Uses sprite-based graphics
-- Implements game loop with constant refresh rate
-- Object-oriented design with inheritance for game entities
+- Demonstrates image clipping and rendering techniques
 
-## Running the Game
+## Running the Project
 
 1. Ensure you have Java installed on your system
 2. Compile the source files
-3. Run the game using:
+3. Run the application using:
    ```
-   java edu.au.gdd.Main
+   java gdd.Main
    ```
 
 ## Development Environment Setup
@@ -107,10 +85,10 @@ src/
 
 4. Open Project
    - File -> Open Folder
-   - Select the space-invaders project folder
+   - Select the sprite-control project folder
    - Wait for VS Code to load and index the Java project
 
-Now you're ready to develop and run the Space Invaders game!
+Now you're ready to develop and run the Megaman sprite rendering project!
 
 ## Requirements
 

@@ -14,7 +14,7 @@
             "type": "java",
             "name": "Main",
             "request": "launch",
-            "mainClass": "gdd.Main",
+            "mainClass": "edu.au.gdd.Main",
             "projectName": "space-invaders_a0edba0"
         }
     ]

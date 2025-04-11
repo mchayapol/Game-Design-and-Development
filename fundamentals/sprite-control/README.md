@@ -56,7 +56,7 @@ src/
 2. Compile the source files
 3. Run the game using:
    ```
-   java gdd.Main
+   java edu.au.gdd.Main
    ```
 
 ## Development Environment Setup

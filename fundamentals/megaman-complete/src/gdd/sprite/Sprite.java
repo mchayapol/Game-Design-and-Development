@@ -12,7 +12,9 @@ public abstract class Sprite {
 
     protected int x;
     protected int y;
+    protected int width;
     protected int dx;
+    protected int dy;
 
     protected Sprite() {
         visible = true;

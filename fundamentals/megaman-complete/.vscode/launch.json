@@ -9,6 +9,20 @@
             "name": "Main",
             "request": "launch",
             "mainClass": "gdd.Main",
+            "projectName": "megaman-complete_cd8ac01e"
+        },
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "gdd.Main",
+            "projectName": "sprite-control_d87820b5"
+        },
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "gdd.Main",
             "projectName": "sprite-control_c2f53ddf"
         },
         {

@@ -13,7 +13,7 @@ public class Global {
     public static final int BORDER_RIGHT = 10; // Doubled from 30
     public static final int BORDER_LEFT = 10; // Doubled from 5
 
-    public static final int GROUND = 500; // Doubled from 290
+    public static final int GROUND = 580; // Doubled from 290
 
     public static final int PLAYER_WIDTH = 100; // Doubled from 15
     public static final int PLAYER_HEIGHT = 100; // Doubled from 10

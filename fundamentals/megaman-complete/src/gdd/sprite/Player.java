@@ -10,7 +10,7 @@ import javax.swing.ImageIcon;
 public class Player extends Sprite {
 
     private static final int START_X = 100;
-    private static final int START_Y = 500;
+    private static final int START_Y = GROUND;
     // private int width;
     private int frame = 0;
     private boolean isFiring = false;
@@ -19,21 +19,29 @@ public class Player extends Sprite {
     public static final int DIR_RIGHT = 1;
     private int facing = DIR_RIGHT;
 
-    private static final int ACT_STANDING = 0;
-    private static final int ACT_RUNNING = 1;
-    private static final int ACT_JUMPING = 2;
-    private int action = ACT_STANDING;
+    private static final String ACT_IDLE = "IDLE";
+    private static final String ACT_IDLE_BLINK = "IDLE_BLINK";
+    private static final String ACT_SHOOT = "SHOOT";
+    private static final String ACT_RUN = "RUN";
+    private static final String ACT_RUN_SHOOT = "RUN_SHOOT";
+    private static final String ACT_JUMP = "JUMP";
+    private static final String ACT_JUMP_SHOOT = "JUMP_SHOOT";
+
+    private String action = ACT_IDLE;
 
     private int clipNo = 0;
-    private final Rectangle[] clips = new Rectangle[] {
-            new Rectangle(18, 20, 80, 90), // 0: stand still
-            new Rectangle(110, 20, 80, 90), // 1: stand blink
-            new Rectangle(294, 20, 90, 90), // 2: run 1
-            new Rectangle(400, 20, 60, 90), // 3: run 2
-            new Rectangle(470, 20, 80, 90), // 4: run 3
-            new Rectangle(138, 230, 100, 110), // 5: jump 1, no firing
-            new Rectangle(18, 149, 80, 90), // 6: jump 2, firing
-
+    private final Rectangle[] clips = new Rectangle[]{
+        new Rectangle(18, 20, 80, 90), // 0: stand still
+        new Rectangle(110, 20, 80, 90), // 1: stand blink
+        new Rectangle(294, 20, 90, 90), // 2: run 1
+        new Rectangle(400, 20, 60, 90), // 3: run 2
+        new Rectangle(470, 20, 80, 90), // 4: run 3
+        new Rectangle(138, 230, 100, 110), // 5: jump 1, no firing
+        new Rectangle(18, 230, 100, 110), // 6: jump 2, firing
+        new Rectangle(128,124,124,94), // 7: stand Shoot
+        new Rectangle(248,120,118,94), // 8: run shoot 1
+        new Rectangle(372,120,118,94), // 9: run shoot 2
+        new Rectangle(486,120,118,94), // 10: run shoot 3
     };
 
     public Player() {
@@ -76,55 +84,87 @@ public class Player extends Sprite {
 
     public void act() {
         // System.out.printf("Player action=%d frame=%d facing=%d (%d,%d)\n", action, frame, facing, x,y);
+        System.out.println("Player act: " + action);
 
         frame++;
 
         switch (action) {
-            case ACT_JUMPING:
-                if (isFiring) {
-                    clipNo = 6;
-                } else {
-                    clipNo = 5;
-                }
-                if(frame > 20) {
+            case ACT_JUMP_SHOOT:
+                clipNo = 6;
+                if (frame > 20) {
                     dy = JUMP_DOWN_DELTA;
                 }
-                if (y + dy >  START_Y) {
+                if (y + dy > START_Y) {
                     // Player has landed
                     if (dx != 0) {
                         // If player was moving, change action to running
-                        action = ACT_RUNNING;
+                        action = ACT_RUN;
                     } else {
                         // If player was not moving, change action to standing
-                        action = ACT_STANDING;
+                        action = ACT_IDLE;
+                    }
+
+                    dy = 0;
+                }
+                break;
+            case ACT_JUMP:
+                clipNo = 5;
+                if (frame > 20) {
+                    dy = JUMP_DOWN_DELTA;
+                }
+                if (y + dy > START_Y) {
+                    // Player has landed
+                    if (dx != 0) {
+                        // If player was moving, change action to running
+                        action = ACT_RUN;
+                    } else {
+                        // If player was not moving, change action to standing
+                        action = ACT_IDLE;
                     }
 
                     dy = 0;
                 }
                 break;
 
-            case ACT_STANDING:
-                if (clipNo == 1 && frame > 5) { // blink only one frame
-                    frame = 0;
-                    clipNo = 0;
-                }
+            case ACT_IDLE:
                 if (frame > 40) { // blink
                     frame = 0;
-                    clipNo = 1; // blink
+                    action = ACT_IDLE_BLINK;
+                } else {
+                    clipNo = 0; // stand still
                 }
 
                 break;
-            case ACT_RUNNING:
-                if (frame <= 10) {
-                    clipNo = 3;
-                } else if (frame <= 20) {
-                    clipNo = 2;
-                } else if (frame <= 30) {
-                    clipNo = 3;
-                } else if (frame <= 40) {
-                    clipNo = 4;
+            case ACT_IDLE_BLINK:
+                if (frame > 10) {
+                    frame = 0;
+                    action = ACT_IDLE; // back to idle
                 } else {
-                    clipNo = 3;
+                    clipNo = 1; // stand blink
+                }
+
+                break;
+            case ACT_SHOOT:
+                clipNo = 7; // stand shoot
+                break;
+            
+            case ACT_RUN:
+            case ACT_RUN_SHOOT:
+                if (frame <= 10) {
+                    // clipNo = 3;
+                    clipNo = (action == ACT_RUN_SHOOT) ? 9 : 3;
+                } else if (frame <= 20) {
+                    // clipNo = 2;
+                    clipNo = (action == ACT_RUN_SHOOT) ? 8 : 2;
+                } else if (frame <= 30) {
+                    // clipNo = 3;
+                    clipNo = (action == ACT_RUN_SHOOT) ? 9 : 3;
+                } else if (frame <= 40) {
+                    // clipNo = 4;
+                    clipNo = (action == ACT_RUN_SHOOT) ? 10 : 4;
+                } else {
+                    // clipNo = 3;
+                    clipNo = (action == ACT_RUN_SHOOT) ? 9 : 3;
                     frame = 0;
                 }
 
@@ -142,72 +182,122 @@ public class Player extends Sprite {
         }
     }
 
-    @Override
-    public void keyDown(KeyEvent e) {
-        System.out.printf("Player keyDown: %s\n", e);
-        int key = e.getKeyCode();
-
-        // if (key == KeyEvent.VK_LEFT || key == KeyEvent.VK_RIGHT) {
-        //     // Prevent multiple key presses from changing action
-        //     if (action != ACT_RUNNING) {
-        //         frame = 0; // Reset frame for running animation
-        //     }
-        // }
-
-        // if (key == KeyEvent.VK_SPACE) {
-        //     isFiring = true; // Player is firing
-        // }
-    }
-
     public void keyPressed(KeyEvent e) {
         int key = e.getKeyCode();
 
-        if (key == KeyEvent.VK_LEFT) {
-            if (action != ACT_RUNNING) {
-                // Change of action
-                frame = 0;
-            }
-            action = ACT_RUNNING;
-            facing = DIR_LEFT;
-            dx = -2;
-        } else if (key == KeyEvent.VK_RIGHT) {
-            if (action != ACT_RUNNING) {
-                // Change of action
-                frame = 0;
-            }
-            action = ACT_RUNNING;
-            facing = DIR_RIGHT;
-            dx = 2;
-        } else if (key == KeyEvent.VK_SPACE) {
-            action = ACT_JUMPING;
-            dy = JUMP_UP_DELTA;
-            frame = 0;
+        switch (action) {
+            case ACT_IDLE:
+                switch (key) {
+                    case KeyEvent.VK_ENTER:
+                        action = ACT_SHOOT;
+                        isFiring = true;
+                        frame = 0;
+                        break;
+                    case KeyEvent.VK_SPACE:
+                        action = ACT_JUMP;
+                        dy = JUMP_UP_DELTA;
+                        frame = 0;
+                        break;
+                    case KeyEvent.VK_LEFT:
+                        if (action != ACT_RUN) {
+                            // if he is not running, start from frame 0
+                            frame = 0;
+                        }
+                        action = ACT_RUN;
+                        facing = DIR_LEFT;
+                        dx = -2;
+                        break;
+                    case KeyEvent.VK_RIGHT:
+                        if (action != ACT_RUN) {
+                            // if he is not running, start from frame 0
+                            frame = 0;
+                        }
+                        action = ACT_RUN;
+                        facing = DIR_RIGHT;
+                        dx = 2;
+                        break;
+
+                    default:
+                        break;
+                }
+                break;
+
+            case ACT_RUN:
+                if (key == KeyEvent.VK_ENTER) {
+                    action = ACT_RUN_SHOOT;
+                    isFiring = true;
+                    frame = 0;
+                } else if (key == KeyEvent.VK_SPACE) {
+                    action = ACT_JUMP;
+                    dy = JUMP_UP_DELTA;
+                    frame = 0;
+                }
+                break;
+
+            case ACT_JUMP:
+                if (key == KeyEvent.VK_ENTER) {
+                    action = ACT_JUMP_SHOOT;
+                    isFiring = true;
+                    // frame = 0;   // continue from ACT_JUMP
+                } else if (key == KeyEvent.VK_LEFT) {
+                    // Start running left
+                    facing = DIR_LEFT;
+                    dx = -2;
+                } else if (key == KeyEvent.VK_RIGHT) {
+                    // Start running right
+                    facing = DIR_RIGHT;
+                    dx = 2;
+                }
+                break;
+
+            default:
+            // Do nothing
         }
+
     }
 
     public void keyReleased(KeyEvent e) {
         int key = e.getKeyCode();
 
-        if (key == KeyEvent.VK_LEFT) {
-            if (action != ACT_STANDING) {
-                // Change of action
-                clipNo = 0;
-                frame = 0;
-            }
-            action = ACT_STANDING;
-            facing = DIR_LEFT;
-            dx = 0;
+        switch (action) {
+            case ACT_SHOOT:
+                if (key == KeyEvent.VK_ENTER) {
+                    // stop shooting
+                    action = ACT_IDLE;
+                    isFiring = false;
+                    frame = 0;
+                }
+                break;
+
+            case ACT_RUN:
+                if (key == KeyEvent.VK_LEFT || key == KeyEvent.VK_RIGHT) {
+                    // Stop running
+                    action = ACT_IDLE;
+                    isFiring = false;
+                    frame = 0;
+                    dx = 0;
+                }
+                break;
+            case ACT_RUN_SHOOT:
+                if (key == KeyEvent.VK_ENTER) {
+                    // stop shooting
+                    action = ACT_RUN;
+                    isFiring = false;
+                    frame = 0;
+                }
+                break;
+
+            case ACT_JUMP_SHOOT:
+                if (key == KeyEvent.VK_ENTER) {
+                    action = ACT_JUMP;
+                    isFiring = false;
+                    frame = 0;
+                }
+                break;
+
+            default:
+            // Do nothing
         }
 
-        if (key == KeyEvent.VK_RIGHT) {
-            if (action != ACT_STANDING) {
-                // Change of action
-                clipNo = 0;
-                frame = 0;
-            }
-            action = ACT_STANDING;
-            facing = DIR_RIGHT;
-            dx = 0;
-        }
     }
 }

@@ -1,6 +1,7 @@
 # Space Invaders
 ## References
 [Space Invader](https://github.com/janbodnar/Java-Space-Invaders)
+[Life Force Spite](https://www.spriters-resource.com/fullview/121201/)
 
 A classic Space Invaders game implementation in Java using Swing for the graphical interface.
 

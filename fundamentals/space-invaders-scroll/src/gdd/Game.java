@@ -1,9 +1,8 @@
 package gdd;
 
-import javax.swing.JFrame;
-
 import gdd.scene.Scene2;
 import gdd.scene.Title;
+import javax.swing.JFrame;
 
 public class Game extends JFrame  {
 
@@ -37,7 +36,7 @@ public class Game extends JFrame  {
         repaint();
     }
 
-    public void loadScene2() {
+    public void loadScene1() {
         getContentPane().removeAll();
         // add(new Scene2(this));
         add(scene2);

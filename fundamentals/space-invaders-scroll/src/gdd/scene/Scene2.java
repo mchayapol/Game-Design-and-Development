@@ -1,8 +1,7 @@
 package gdd.scene;
 
-import static gdd.Global.*;
-
 import gdd.Game;
+import static gdd.Global.*;
 import gdd.sprite.Enemy;
 import gdd.sprite.Explosion;
 import gdd.sprite.Player;
@@ -58,7 +57,7 @@ public class Scene2 extends JPanel {
         {0,1,0,0,0,0,0,0,0,0,0,0},
         {0,1,0,0,0,0,0,0,0,0,0,0},
         {0,1,0,0,0,0,0,0,0,0,0,0}
-    }
+    };
 
     public Scene2(Game game) {
         this.game = game;
@@ -240,7 +239,7 @@ public class Scene2 extends JPanel {
         // Start rendering map after frame 100
         if (frame > 100) {
             // assume 50 is the block width
-            MAP[(frame-100) / 50]
+            // MAP[(frame-100) / 50]
         }
 
         if (deaths == NUMBER_OF_ALIENS_TO_DESTROY) {

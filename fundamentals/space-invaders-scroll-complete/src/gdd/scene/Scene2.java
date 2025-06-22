@@ -4,6 +4,7 @@ import gdd.AudioPlayer;
 import gdd.Game;
 import static gdd.Global.*;
 import gdd.SpawnDetails;
+import gdd.sprite.Alien1;
 import gdd.sprite.Enemy;
 import gdd.sprite.Explosion;
 import gdd.sprite.Player;
@@ -34,6 +35,11 @@ public class Scene2 extends JPanel {
     private Player player;
     // private Shot shot;
 
+    final int BLOCKHEIGHT = 50;
+    final int BLOCKWIDTH = 50;
+
+    final int BLOCKS_TO_DRAW = BOARD_HEIGHT / BLOCKHEIGHT;
+
     private int direction = -1;
     private int deaths = 0;
 
@@ -48,10 +54,11 @@ public class Scene2 extends JPanel {
 
     private int currentRow = -1;
     // TODO load this map from a file
+    private int mapOffset = 0;
     private final int[][] MAP = {
-        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0},
         {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -67,6 +74,8 @@ public class Scene2 extends JPanel {
 
     private HashMap<Integer, SpawnDetails> spawnMap = new HashMap<>();
     private AudioPlayer audioPlayer;
+    private int lastRowToShow;
+    private int firstRowToShow;
 
     public Scene2(Game game) {
         this.game = game;
@@ -87,10 +96,19 @@ public class Scene2 extends JPanel {
 
     private void loadSpawnDetails() {
         // TODO load this from a file
-        spawnMap.put(100, new SpawnDetails("Alien1", 0, 0));
-        spawnMap.put(200, new SpawnDetails("Alien1", 1, 1));
-        spawnMap.put(300, new SpawnDetails("Alien1", 1, 1));
-        spawnMap.put(400, new SpawnDetails("Alien1", 1, 1));
+        spawnMap.put(100, new SpawnDetails("Alien1", 100, 0));
+        spawnMap.put(200, new SpawnDetails("Alien1", 200, 0));
+        spawnMap.put(300, new SpawnDetails("Alien1", 300, 0));
+
+        spawnMap.put(400, new SpawnDetails("Alien1", 400, 0));
+        spawnMap.put(401, new SpawnDetails("Alien1", 450, 0));
+        spawnMap.put(402, new SpawnDetails("Alien1", 500, 0));
+        spawnMap.put(403, new SpawnDetails("Alien1", 550, 0));
+
+        spawnMap.put(500, new SpawnDetails("Alien1", 100, 0));
+        spawnMap.put(501, new SpawnDetails("Alien1", 150, 0));
+        spawnMap.put(502, new SpawnDetails("Alien1", 200, 0));
+        spawnMap.put(503, new SpawnDetails("Alien1", 350, 0));    
     }
 
     private void initBoard() {
@@ -136,6 +154,27 @@ public class Scene2 extends JPanel {
         // }
         player = new Player();
         // shot = new Shot();
+    }
+
+    private void drawMap(Graphics g) {
+
+        // Draw the map based on the current frame
+        if (frame > 100) {
+            for (int i = firstRowToShow; i <= lastRowToShow; i++) {
+                if (i < 0 || i >= MAP.length) {
+                    continue; // Skip rows that are out of bounds
+                }
+                for (int j = 0; j < MAP[i].length; j++) {
+                    if (MAP[i][j] == 1) {
+                        // TODO: Replace with actual block image
+                        // g.drawImage(IMG_BLOCK, j * BLOCKWIDTH, i * BLOCKHEIGHT, this);
+                        g.setColor(Color.white);
+                        g.drawRect(j*BLOCKWIDTH, i*BLOCKHEIGHT, BLOCKWIDTH, BLOCKHEIGHT);
+                        g.drawString("MAP " + i + " , " + j,0,40);
+                    }
+                }
+            }
+        }
     }
 
     private void drawAliens(Graphics g) {
@@ -222,7 +261,7 @@ public class Scene2 extends JPanel {
         g.fillRect(0, 0, d.width, d.height);
 
         g.setColor(Color.white);
-        g.drawString("FRAME:" + frame, 10, 10);
+        g.drawString("FRAME: " + frame + " MAP Rows: "+ firstRowToShow + "," + lastRowToShow, 10, 10);
 
         g.setColor(Color.green);
 
@@ -231,6 +270,7 @@ public class Scene2 extends JPanel {
             g.drawLine(0, GROUND,
                     BOARD_WIDTH, GROUND);
 
+            // drawMap(g);
             drawExplosions(g);
             drawAliens(g);
             drawPlayer(g);
@@ -272,10 +312,36 @@ public class Scene2 extends JPanel {
 
         // Start rendering map after frame 100
         if (frame > 100) {
-            // assume 50 is the block width
-            int blockHeight = 50;
-            int row = (frame - 100) / blockHeight;
+           
+            lastRowToShow = (frame - 100) / BLOCKHEIGHT;
+            // rowsToDraw = MAP[lastRowToShow];
+
+            firstRowToShow = lastRowToShow - BLOCKS_TO_DRAW;
+            firstRowToShow = (firstRowToShow < 0) ? 0 : firstRowToShow;
+            System.out.println("BOARD_HEIGHT % BLOCKHEIGHT: " + BOARD_HEIGHT + "-"+BLOCKHEIGHT+"="+ BLOCKS_TO_DRAW);
+
             // MAP[(frame-100) / 50]
+        }
+
+        // Check enemy spawn
+        // TODO this approach can only spawn one enemy at a frame
+        SpawnDetails sd = spawnMap.get(frame);
+        if (sd != null) {
+            // Create a new enemy based on the spawn details
+            switch(sd.getType()) {
+                case "Alien1":
+                    Enemy enemy = new Alien1(sd.getX(), sd.getY());
+                    enemies.add(enemy);
+                    break;
+                // Add more cases for different enemy types if needed
+                case "Alien2":
+                    // Enemy enemy2 = new Alien2(sd.x, sd.y);
+                    // enemies.add(enemy2);
+                    break;
+                default:
+                    System.out.println("Unknown enemy type: " + sd.getType());
+                    break;
+            }
         }
 
         if (deaths == NUMBER_OF_ALIENS_TO_DESTROY) {
@@ -286,6 +352,12 @@ public class Scene2 extends JPanel {
 
         // player
         player.act();
+        // Enemies
+        for (Enemy enemy : enemies) {
+            if (enemy.isVisible()) {
+                enemy.act(direction);
+            }
+        }
 
         // shot
         List<Shot> shotsToRemove = new ArrayList<>();
@@ -331,42 +403,42 @@ public class Scene2 extends JPanel {
         shots.removeAll(shotsToRemove);
 
         // enemies
-        for (Enemy enemy : enemies) {
+        // for (Enemy enemy : enemies) {
 
-            int x = enemy.getX();
+        //     int x = enemy.getX();
 
-            if (x >= BOARD_WIDTH - BORDER_RIGHT && direction != -1) {
+        //     if (x >= BOARD_WIDTH - BORDER_RIGHT && direction != -1) {
 
-                direction = -1;
+        //         direction = -1;
 
-                for (Enemy e2 : enemies) {
-                    e2.setY(e2.getY() + GO_DOWN);
-                }
-            }
+        //         for (Enemy e2 : enemies) {
+        //             e2.setY(e2.getY() + GO_DOWN);
+        //         }
+        //     }
 
-            if (x <= BORDER_LEFT && direction != 1) {
+        //     if (x <= BORDER_LEFT && direction != 1) {
 
-                direction = 1;
+        //         direction = 1;
 
-                for (Enemy e : enemies) {
-                    e.setY(e.getY() + GO_DOWN);
-                }
-            }
-        }
+        //         for (Enemy e : enemies) {
+        //             e.setY(e.getY() + GO_DOWN);
+        //         }
+        //     }
+        // }
 
-        for (Enemy enemy : enemies) {
-            if (enemy.isVisible()) {
+        // for (Enemy enemy : enemies) {
+        //     if (enemy.isVisible()) {
 
-                int y = enemy.getY();
+        //         int y = enemy.getY();
 
-                if (y > GROUND - ALIEN_HEIGHT) {
-                    inGame = false;
-                    message = "Invasion!";
-                }
+        //         if (y > GROUND - ALIEN_HEIGHT) {
+        //             inGame = false;
+        //             message = "Invasion!";
+        //         }
 
-                enemy.act(direction);
-            }
-        }
+        //         enemy.act(direction);
+        //     }
+        // }
 
         // bombs
         for (Enemy enemy : enemies) {

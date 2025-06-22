@@ -105,10 +105,6 @@ public class AudioPlayer {
         status = "play";
     }
 
-    public void stop() {
-        clip.stop();
-        status = "stop";
-    }
 
     // Method to pause the audio
     public void pause() {

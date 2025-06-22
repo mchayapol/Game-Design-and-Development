@@ -1,7 +1,9 @@
 package gdd.scene;
 
+import gdd.AudioPlayer;
 import gdd.Game;
 import static gdd.Global.*;
+import gdd.SpawnDetails;
 import gdd.sprite.Enemy;
 import gdd.sprite.Explosion;
 import gdd.sprite.Player;
@@ -16,6 +18,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import javax.swing.ImageIcon;
@@ -23,6 +26,7 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 public class Scene2 extends JPanel {
+
     private int frame = 0;
     private List<Enemy> enemies;
     private List<Explosion> explosions;
@@ -42,27 +46,51 @@ public class Scene2 extends JPanel {
     private Timer timer;
     private final Game game;
 
+    private int currentRow = -1;
+    // TODO load this map from a file
     private final int[][] MAP = {
-        {0,1,0,0,0,0,0,0,0,0,0,0},
-        {0,1,0,0,0,0,0,0,0,0,0,0},
-        {0,1,0,0,0,0,0,0,0,0,0,0},
-        {0,1,0,0,0,0,0,0,0,0,0,0},
-        {0,1,0,0,0,0,0,0,0,0,0,0},
-        {0,1,0,0,0,0,0,0,0,0,0,0},
-        {0,1,0,0,0,0,0,0,0,0,0,0},
-        {0,1,0,0,0,0,0,0,0,0,0,0},
-        {0,1,0,0,0,0,0,0,0,0,0,0},
-        {0,1,0,0,0,0,0,0,0,0,0,0},
-        {0,1,0,0,0,0,0,0,0,0,0,0},
-        {0,1,0,0,0,0,0,0,0,0,0,0},
-        {0,1,0,0,0,0,0,0,0,0,0,0},
-        {0,1,0,0,0,0,0,0,0,0,0,0}
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
     };
+
+    private HashMap<Integer, SpawnDetails> spawnMap = new HashMap<>();
+    private AudioPlayer audioPlayer;
 
     public Scene2(Game game) {
         this.game = game;
         // initBoard();
         // gameInit();
+        loadSpawnDetails();
+    }
+
+    private void initAudio() {
+        try {
+            String filePath = "src/audio/scene2.wav";
+            audioPlayer = new AudioPlayer(filePath);
+            audioPlayer.play();
+        } catch (Exception e) {
+            System.err.println("Error initializing audio player: " + e.getMessage());
+        }
+    }
+
+    private void loadSpawnDetails() {
+        // TODO load this from a file
+        spawnMap.put(100, new SpawnDetails("Alien1", 0, 0));
+        spawnMap.put(200, new SpawnDetails("Alien1", 1, 1));
+        spawnMap.put(300, new SpawnDetails("Alien1", 1, 1));
+        spawnMap.put(400, new SpawnDetails("Alien1", 1, 1));
     }
 
     private void initBoard() {
@@ -79,10 +107,18 @@ public class Scene2 extends JPanel {
         timer.start();
 
         gameInit();
+        initAudio();
     }
 
     public void stop() {
         timer.stop();
+        try {
+            if (audioPlayer != null) {
+                audioPlayer.stop();
+            }
+        } catch (Exception e) {
+            System.err.println("Error closing audio player.");
+        }
     }
 
     private void gameInit() {
@@ -93,13 +129,11 @@ public class Scene2 extends JPanel {
 
         // for (int i = 0; i < 4; i++) {
         // for (int j = 0; j < 6; j++) {
-
         // var enemy = new Enemy(ALIEN_INIT_X + (ALIEN_WIDTH + ALIEN_GAP) * j,
         // ALIEN_INIT_Y + (ALIEN_HEIGHT + ALIEN_GAP) * i);
         // enemies.add(enemy);
         // }
         // }
-
         player = new Player();
         // shot = new Shot();
     }
@@ -188,7 +222,7 @@ public class Scene2 extends JPanel {
         g.fillRect(0, 0, d.width, d.height);
 
         g.setColor(Color.white);
-        g.drawString("Chayapol", 10, 10);
+        g.drawString("FRAME:" + frame, 10, 10);
 
         g.setColor(Color.green);
 
@@ -239,6 +273,8 @@ public class Scene2 extends JPanel {
         // Start rendering map after frame 100
         if (frame > 100) {
             // assume 50 is the block width
+            int blockHeight = 50;
+            int row = (frame - 100) / blockHeight;
             // MAP[(frame-100) / 50]
         }
 
@@ -372,6 +408,7 @@ public class Scene2 extends JPanel {
     }
 
     private void doGameCycle() {
+        frame++;
         update();
         repaint();
     }

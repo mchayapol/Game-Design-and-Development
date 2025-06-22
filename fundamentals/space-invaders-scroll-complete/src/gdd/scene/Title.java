@@ -1,5 +1,7 @@
 package gdd.scene;
 
+import gdd.AudioPlayer;
+import gdd.Game;
 import static gdd.Global.*;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -10,17 +12,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-
-import javax.sound.sampled.AudioFileFormat;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.Timer;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
-import java.io.File;
-
-import gdd.AudioPlayer;
-import gdd.Game;
 
 public class Title extends JPanel {
 
@@ -55,7 +49,13 @@ public class Title extends JPanel {
 
     public void stop() {
         timer.stop();
-        if(audioPlayer != null) audioPlayer.stop();
+        try {
+            if (audioPlayer != null) {
+                audioPlayer.stop();
+            }
+        } catch (Exception e) {
+            System.err.println("Error closing audio player.");
+        }
     }
 
     private void initTitle() {
@@ -141,7 +141,7 @@ public class Title extends JPanel {
             int key = e.getKeyCode();
             if (key == KeyEvent.VK_SPACE) {
                 // Load the next scene
-                game.loadScene1();
+                game.loadScene2();
             }
 
         }

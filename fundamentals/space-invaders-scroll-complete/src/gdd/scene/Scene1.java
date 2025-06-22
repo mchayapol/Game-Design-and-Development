@@ -1,8 +1,7 @@
 package gdd.scene;
 
-import static gdd.Global.*;
-
 import gdd.Game;
+import static gdd.Global.*;
 import gdd.sprite.Enemy;
 import gdd.sprite.Explosion;
 import gdd.sprite.Player;
@@ -24,7 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 public class Scene1 extends JPanel {
-
+    private int frame = 0;
     private List<Enemy> enemies;
     private List<Explosion> explosions;
     private List<Shot> shots;
@@ -220,6 +219,7 @@ public class Scene1 extends JPanel {
 
     private void update() {
 
+        
         if (deaths == NUMBER_OF_ALIENS_TO_DESTROY) {
             inGame = false;
             timer.stop();
@@ -350,6 +350,7 @@ public class Scene1 extends JPanel {
     }
 
     private void doGameCycle() {
+        frame++;
         update();
         repaint();
     }

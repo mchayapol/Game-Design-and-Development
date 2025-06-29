@@ -34,4 +34,5 @@ public class Global {
     public static final String IMG_SHOT = "src/images/shot.png";
     public static final String IMG_EXPLOSION = "src/images/explosion.png";
     public static final String IMG_TITLE = "src/images/title.png";
+    public static final String IMG_POWERUP_SPEEDUP = "src/images/powerup-s.png";
 }

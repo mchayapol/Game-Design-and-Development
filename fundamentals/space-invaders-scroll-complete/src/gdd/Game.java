@@ -1,18 +1,20 @@
 package gdd;
 
-import gdd.scene.Scene2;
-import gdd.scene.Title;
+import gdd.scene.Scene1;
+import gdd.scene.TitleScene;
 import javax.swing.JFrame;
 
 public class Game extends JFrame  {
 
-    Title title;
-    Scene2 scene2;
+    TitleScene titleScene;
+    Scene1 scene1;
 
     public Game() {
-        title = new Title(this);
-        scene2 = new Scene2(this);
+        titleScene = new TitleScene(this);
+        scene1 = new Scene1(this);
         initUI();
+        // loadTitle();
+        loadScene2();
     }
 
     private void initUI() {
@@ -24,14 +26,13 @@ public class Game extends JFrame  {
         setResizable(false);
         setLocationRelativeTo(null);
 
-        loadTitle();
     }
 
     public void loadTitle() {
         getContentPane().removeAll();
         // add(new Title(this));
-        add(title);
-        title.start();
+        add(titleScene);
+        titleScene.start();
         revalidate();
         repaint();
     }
@@ -42,9 +43,9 @@ public class Game extends JFrame  {
 
     public void loadScene2() {
         getContentPane().removeAll();
-        add(scene2);
-        title.stop();
-        scene2.start();
+        add(scene1);
+        titleScene.stop();
+        scene1.start();
         revalidate();
         repaint();
     }

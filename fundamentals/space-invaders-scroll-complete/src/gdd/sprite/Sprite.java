@@ -2,19 +2,31 @@ package gdd.sprite;
 
 import java.awt.Image;
 
-public class Sprite {
+abstract public class Sprite {
 
-    private boolean visible;
-    private Image image;
-    private boolean dying;
-    private int visibleFrames = 10;
+    protected boolean visible;
+    protected Image image;
+    protected boolean dying;
+    protected int visibleFrames = 10;
 
-    int x;
-    int y;
-    int dx;
+    protected int x;
+    protected int y;
+    protected int dx;
 
     public Sprite() {
         visible = true;
+    }
+
+    abstract public void act();
+
+    public boolean collidesWith(Sprite other) {
+        if (other == null || !this.isVisible() || !other.isVisible()) {
+            return false;
+        }
+        return this.getX() < other.getX() + other.getImage().getWidth(null)
+                && this.getX() + this.getImage().getWidth(null) > other.getX()
+                && this.getY() < other.getY() + other.getImage().getHeight(null)
+                && this.getY() + this.getImage().getHeight(null) > other.getY();
     }
 
     public void die() {

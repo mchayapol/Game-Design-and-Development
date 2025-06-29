@@ -1,7 +1,12 @@
 package gdd.scene;
 
+import gdd.AudioPlayer;
 import gdd.Game;
 import static gdd.Global.*;
+import gdd.SpawnDetails;
+import gdd.powerup.PowerUp;
+import gdd.powerup.SpeedUp;
+import gdd.sprite.Alien1;
 import gdd.sprite.Enemy;
 import gdd.sprite.Explosion;
 import gdd.sprite.Player;
@@ -16,6 +21,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import javax.swing.ImageIcon;
@@ -23,12 +29,19 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 public class Scene1 extends JPanel {
+
     private int frame = 0;
+    private List<PowerUp> powerups;
     private List<Enemy> enemies;
     private List<Explosion> explosions;
     private List<Shot> shots;
     private Player player;
     // private Shot shot;
+
+    final int BLOCKHEIGHT = 50;
+    final int BLOCKWIDTH = 50;
+
+    final int BLOCKS_TO_DRAW = BOARD_HEIGHT / BLOCKHEIGHT;
 
     private int direction = -1;
     private int deaths = 0;
@@ -42,10 +55,63 @@ public class Scene1 extends JPanel {
     private Timer timer;
     private final Game game;
 
+    private int currentRow = -1;
+    // TODO load this map from a file
+    private int mapOffset = 0;
+    private final int[][] MAP = {
+        {0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+    };
+
+    private HashMap<Integer, SpawnDetails> spawnMap = new HashMap<>();
+    private AudioPlayer audioPlayer;
+    private int lastRowToShow;
+    private int firstRowToShow;
+
     public Scene1(Game game) {
         this.game = game;
         // initBoard();
         // gameInit();
+        loadSpawnDetails();
+    }
+
+    private void initAudio() {
+        try {
+            String filePath = "src/audio/scene1.wav";
+            audioPlayer = new AudioPlayer(filePath);
+            audioPlayer.play();
+        } catch (Exception e) {
+            System.err.println("Error initializing audio player: " + e.getMessage());
+        }
+    }
+
+    private void loadSpawnDetails() {
+        // TODO load this from a file
+        spawnMap.put(50, new SpawnDetails("PowerUp-SpeedUp", 100, 0));
+        spawnMap.put(200, new SpawnDetails("Alien1", 200, 0));
+        spawnMap.put(300, new SpawnDetails("Alien1", 300, 0));
+
+        spawnMap.put(400, new SpawnDetails("Alien1", 400, 0));
+        spawnMap.put(401, new SpawnDetails("Alien1", 450, 0));
+        spawnMap.put(402, new SpawnDetails("Alien1", 500, 0));
+        spawnMap.put(403, new SpawnDetails("Alien1", 550, 0));
+
+        spawnMap.put(500, new SpawnDetails("Alien1", 100, 0));
+        spawnMap.put(501, new SpawnDetails("Alien1", 150, 0));
+        spawnMap.put(502, new SpawnDetails("Alien1", 200, 0));
+        spawnMap.put(503, new SpawnDetails("Alien1", 350, 0));    
     }
 
     private void initBoard() {
@@ -62,29 +128,57 @@ public class Scene1 extends JPanel {
         timer.start();
 
         gameInit();
+        initAudio();
     }
 
     public void stop() {
         timer.stop();
+        try {
+            if (audioPlayer != null) {
+                audioPlayer.stop();
+            }
+        } catch (Exception e) {
+            System.err.println("Error closing audio player.");
+        }
     }
 
     private void gameInit() {
 
         enemies = new ArrayList<>();
+        powerups = new ArrayList<>();
         explosions = new ArrayList<>();
         shots = new ArrayList<>();
 
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 6; j++) {
-
-                var enemy = new Enemy(ALIEN_INIT_X + (ALIEN_WIDTH + ALIEN_GAP) * j,
-                        ALIEN_INIT_Y + (ALIEN_HEIGHT + ALIEN_GAP) * i);
-                enemies.add(enemy);
-            }
-        }
-
+        // for (int i = 0; i < 4; i++) {
+        // for (int j = 0; j < 6; j++) {
+        // var enemy = new Enemy(ALIEN_INIT_X + (ALIEN_WIDTH + ALIEN_GAP) * j,
+        // ALIEN_INIT_Y + (ALIEN_HEIGHT + ALIEN_GAP) * i);
+        // enemies.add(enemy);
+        // }
+        // }
         player = new Player();
         // shot = new Shot();
+    }
+
+    private void drawMap(Graphics g) {
+
+        // Draw the map based on the current frame
+        if (frame > 100) {
+            for (int i = firstRowToShow; i <= lastRowToShow; i++) {
+                if (i < 0 || i >= MAP.length) {
+                    continue; // Skip rows that are out of bounds
+                }
+                for (int j = 0; j < MAP[i].length; j++) {
+                    if (MAP[i][j] == 1) {
+                        // TODO: Replace with actual block image
+                        // g.drawImage(IMG_BLOCK, j * BLOCKWIDTH, i * BLOCKHEIGHT, this);
+                        g.setColor(Color.white);
+                        g.drawRect(j*BLOCKWIDTH, i*BLOCKHEIGHT, BLOCKWIDTH, BLOCKHEIGHT);
+                        g.drawString("MAP " + i + " , " + j,0,40);
+                    }
+                }
+            }
+        }
     }
 
     private void drawAliens(Graphics g) {
@@ -99,6 +193,22 @@ public class Scene1 extends JPanel {
             if (enemy.isDying()) {
 
                 enemy.die();
+            }
+        }
+    }
+
+        private void drawPowreUps(Graphics g) {
+
+        for (PowerUp p : powerups) {
+
+            if (p.isVisible()) {
+
+                g.drawImage(p.getImage(), p.getX(), p.getY(), this);
+            }
+
+            if (p.isDying()) {
+
+                p.die();
             }
         }
     }
@@ -129,15 +239,15 @@ public class Scene1 extends JPanel {
 
     private void drawBombing(Graphics g) {
 
-        for (Enemy e : enemies) {
+        // for (Enemy e : enemies) {
 
-            Enemy.Bomb b = e.getBomb();
+        //     Enemy.Bomb b = e.getBomb();
 
-            if (!b.isDestroyed()) {
+        //     if (!b.isDestroyed()) {
 
-                g.drawImage(b.getImage(), b.getX(), b.getY(), this);
-            }
-        }
+        //         g.drawImage(b.getImage(), b.getX(), b.getY(), this);
+        //     }
+        // }
     }
 
     private void drawExplosions(Graphics g) {
@@ -171,20 +281,21 @@ public class Scene1 extends JPanel {
         g.fillRect(0, 0, d.width, d.height);
 
         g.setColor(Color.white);
-        g.drawString("Chayapol", 10, 10);
+        g.drawString("FRAME: " + frame + " MAP Rows: "+ firstRowToShow + "," + lastRowToShow, 10, 10);
 
         g.setColor(Color.green);
 
         if (inGame) {
 
-            g.drawLine(0, GROUND,
-                    BOARD_WIDTH, GROUND);
+            // g.drawLine(0, GROUND,BOARD_WIDTH, GROUND);
 
+            // drawMap(g);
             drawExplosions(g);
+            drawPowreUps(g);
             drawAliens(g);
             drawPlayer(g);
             drawShot(g);
-            drawBombing(g);
+            // drawBombing(g);
 
         } else {
 
@@ -219,7 +330,45 @@ public class Scene1 extends JPanel {
 
     private void update() {
 
-        
+        // Start rendering map after frame 100
+        if (frame > 100) {
+           
+            lastRowToShow = (frame - 100) / BLOCKHEIGHT;
+            // rowsToDraw = MAP[lastRowToShow];
+
+            firstRowToShow = lastRowToShow - BLOCKS_TO_DRAW;
+            firstRowToShow = (firstRowToShow < 0) ? 0 : firstRowToShow;
+            System.out.println("BOARD_HEIGHT % BLOCKHEIGHT: " + BOARD_HEIGHT + "-"+BLOCKHEIGHT+"="+ BLOCKS_TO_DRAW);
+
+            // MAP[(frame-100) / 50]
+        }
+
+        // Check enemy spawn
+        // TODO this approach can only spawn one enemy at a frame
+        SpawnDetails sd = spawnMap.get(frame);
+        if (sd != null) {
+            // Create a new enemy based on the spawn details
+            switch(sd.type) {
+                case "Alien1":
+                    Enemy enemy = new Alien1(sd.x, sd.y);
+                    enemies.add(enemy);
+                    break;
+                // Add more cases for different enemy types if needed
+                case "Alien2":
+                    // Enemy enemy2 = new Alien2(sd.x, sd.y);
+                    // enemies.add(enemy2);
+                    break;
+                case "PowerUp-SpeedUp":
+                    // Handle speed up item spawn
+                    PowerUp speedUp = new SpeedUp(sd.x, sd.y);
+                    powerups.add(speedUp);
+                    break;
+                default:
+                    System.out.println("Unknown enemy type: " + sd.type);
+                    break;
+            }
+        }
+
         if (deaths == NUMBER_OF_ALIENS_TO_DESTROY) {
             inGame = false;
             timer.stop();
@@ -228,6 +377,23 @@ public class Scene1 extends JPanel {
 
         // player
         player.act();
+
+        // Power-ups
+        for(PowerUp powerup : powerups) {
+            if (powerup.isVisible()) {
+                powerup.act();
+                if (powerup.collidesWith(player)) {
+                    powerup.upgrade(player);
+                }
+            }
+        }
+
+        // Enemies
+        for (Enemy enemy : enemies) {
+            if (enemy.isVisible()) {
+                enemy.act(direction);
+            }
+        }
 
         // shot
         List<Shot> shotsToRemove = new ArrayList<>();
@@ -273,44 +439,46 @@ public class Scene1 extends JPanel {
         shots.removeAll(shotsToRemove);
 
         // enemies
-        for (Enemy enemy : enemies) {
+        // for (Enemy enemy : enemies) {
 
-            int x = enemy.getX();
+        //     int x = enemy.getX();
 
-            if (x >= BOARD_WIDTH - BORDER_RIGHT && direction != -1) {
+        //     if (x >= BOARD_WIDTH - BORDER_RIGHT && direction != -1) {
 
-                direction = -1;
+        //         direction = -1;
 
-                for (Enemy e2 : enemies) {
-                    e2.setY(e2.getY() + GO_DOWN);
-                }
-            }
+        //         for (Enemy e2 : enemies) {
+        //             e2.setY(e2.getY() + GO_DOWN);
+        //         }
+        //     }
 
-            if (x <= BORDER_LEFT && direction != 1) {
+        //     if (x <= BORDER_LEFT && direction != 1) {
 
-                direction = 1;
+        //         direction = 1;
 
-                for (Enemy e : enemies) {
-                    e.setY(e.getY() + GO_DOWN);
-                }
-            }
-        }
+        //         for (Enemy e : enemies) {
+        //             e.setY(e.getY() + GO_DOWN);
+        //         }
+        //     }
+        // }
 
-        for (Enemy enemy : enemies) {
-            if (enemy.isVisible()) {
+        // for (Enemy enemy : enemies) {
+        //     if (enemy.isVisible()) {
 
-                int y = enemy.getY();
+        //         int y = enemy.getY();
 
-                if (y > GROUND - ALIEN_HEIGHT) {
-                    inGame = false;
-                    message = "Invasion!";
-                }
+        //         if (y > GROUND - ALIEN_HEIGHT) {
+        //             inGame = false;
+        //             message = "Invasion!";
+        //         }
 
-                enemy.act(direction);
-            }
-        }
+        //         enemy.act(direction);
+        //     }
+        // }
 
-        // bombs
+        // bombs - collision detection
+        // Bomb is with enemy, so it loops over enemies
+        /*
         for (Enemy enemy : enemies) {
 
             int chance = randomizer.nextInt(15);
@@ -347,6 +515,8 @@ public class Scene1 extends JPanel {
                 }
             }
         }
+        */
+    
     }
 
     private void doGameCycle() {
@@ -369,10 +539,10 @@ public class Scene1 extends JPanel {
         public void keyReleased(KeyEvent e) {
             player.keyReleased(e);
         }
-        
+
         @Override
         public void keyPressed(KeyEvent e) {
-            System.out.println("Scene1.keyPressed: " + e.getKeyCode());
+            System.out.println("Scene2.keyPressed: " + e.getKeyCode());
 
             player.keyPressed(e);
 

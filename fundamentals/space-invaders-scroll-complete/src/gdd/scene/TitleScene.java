@@ -16,7 +16,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
-public class Title extends JPanel {
+public class TitleScene extends JPanel {
 
     private int frame = 0;
     private Image image;
@@ -25,7 +25,7 @@ public class Title extends JPanel {
     private Timer timer;
     private Game game;
 
-    public Title(Game game) {
+    public TitleScene(Game game) {
         this.game = game;
         // initBoard();
         // initTitle();
@@ -48,8 +48,11 @@ public class Title extends JPanel {
     }
 
     public void stop() {
-        timer.stop();
         try {
+            if (timer != null) {
+                timer.stop();
+            }
+
             if (audioPlayer != null) {
                 audioPlayer.stop();
             }

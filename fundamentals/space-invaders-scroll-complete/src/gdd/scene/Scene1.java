@@ -59,20 +59,30 @@ public class Scene1 extends JPanel {
     // TODO load this map from a file
     private int mapOffset = 0;
     private final int[][] MAP = {
-        {0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0},
-        {0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0},
-        {0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+        {0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}
     };
 
     private HashMap<Integer, SpawnDetails> spawnMap = new HashMap<>();
@@ -111,7 +121,7 @@ public class Scene1 extends JPanel {
         spawnMap.put(500, new SpawnDetails("Alien1", 100, 0));
         spawnMap.put(501, new SpawnDetails("Alien1", 150, 0));
         spawnMap.put(502, new SpawnDetails("Alien1", 200, 0));
-        spawnMap.put(503, new SpawnDetails("Alien1", 350, 0));    
+        spawnMap.put(503, new SpawnDetails("Alien1", 350, 0));
     }
 
     private void initBoard() {
@@ -161,24 +171,64 @@ public class Scene1 extends JPanel {
     }
 
     private void drawMap(Graphics g) {
+        // Draw scrolling starfield background
 
-        // Draw the map based on the current frame
-        if (frame > 100) {
-            for (int i = firstRowToShow; i <= lastRowToShow; i++) {
-                if (i < 0 || i >= MAP.length) {
-                    continue; // Skip rows that are out of bounds
-                }
-                for (int j = 0; j < MAP[i].length; j++) {
-                    if (MAP[i][j] == 1) {
-                        // TODO: Replace with actual block image
-                        // g.drawImage(IMG_BLOCK, j * BLOCKWIDTH, i * BLOCKHEIGHT, this);
-                        g.setColor(Color.white);
-                        g.drawRect(j*BLOCKWIDTH, i*BLOCKHEIGHT, BLOCKWIDTH, BLOCKHEIGHT);
-                        g.drawString("MAP " + i + " , " + j,0,40);
-                    }
+        // Calculate smooth scrolling offset (1 pixel per frame)
+        int scrollOffset = (frame) % BLOCKHEIGHT;
+
+        // Calculate which rows to draw based on screen position
+        int baseRow = (frame) / BLOCKHEIGHT;
+        int rowsNeeded = (BOARD_HEIGHT / BLOCKHEIGHT) + 2; // +2 for smooth scrolling
+
+        // Loop through rows that should be visible on screen
+        for (int screenRow = 0; screenRow < rowsNeeded; screenRow++) {
+            // Calculate which MAP row to use (with wrapping)
+            int mapRow = (baseRow + screenRow) % MAP.length;
+
+            // Calculate Y position for this row
+            // int y = (screenRow * BLOCKHEIGHT) - scrollOffset;
+            int y = BOARD_HEIGHT - ( (screenRow * BLOCKHEIGHT) - scrollOffset );
+
+            // Skip if row is completely off-screen
+            if (y > BOARD_HEIGHT || y < -BLOCKHEIGHT) {
+                continue;
+            }
+
+            // Draw each column in this row
+            for (int col = 0; col < MAP[mapRow].length; col++) {
+                if (MAP[mapRow][col] == 1) {
+                    // Calculate X position
+                    int x = col * BLOCKWIDTH;
+
+                    // Draw a cluster of stars
+                    drawStarCluster(g, x, y, BLOCKWIDTH, BLOCKHEIGHT);
                 }
             }
         }
+
+    }
+
+    private void drawStarCluster(Graphics g, int x, int y, int width, int height) {
+        // Set star color to white
+        g.setColor(Color.WHITE);
+
+        // Draw multiple stars in a cluster pattern
+        // Main star (larger)
+        int centerX = x + width / 2;
+        int centerY = y + height / 2;
+        g.fillOval(centerX - 2, centerY - 2, 4, 4);
+
+        // Smaller surrounding stars
+        g.fillOval(centerX - 15, centerY - 10, 2, 2);
+        g.fillOval(centerX + 12, centerY - 8, 2, 2);
+        g.fillOval(centerX - 8, centerY + 12, 2, 2);
+        g.fillOval(centerX + 10, centerY + 15, 2, 2);
+
+        // Tiny stars for more detail
+        g.fillOval(centerX - 20, centerY + 5, 1, 1);
+        g.fillOval(centerX + 18, centerY - 15, 1, 1);
+        g.fillOval(centerX - 5, centerY - 18, 1, 1);
+        g.fillOval(centerX + 8, centerY + 20, 1, 1);
     }
 
     private void drawAliens(Graphics g) {
@@ -197,7 +247,7 @@ public class Scene1 extends JPanel {
         }
     }
 
-        private void drawPowreUps(Graphics g) {
+    private void drawPowreUps(Graphics g) {
 
         for (PowerUp p : powerups) {
 
@@ -240,11 +290,8 @@ public class Scene1 extends JPanel {
     private void drawBombing(Graphics g) {
 
         // for (Enemy e : enemies) {
-
         //     Enemy.Bomb b = e.getBomb();
-
         //     if (!b.isDestroyed()) {
-
         //         g.drawImage(b.getImage(), b.getX(), b.getY(), this);
         //     }
         // }
@@ -281,21 +328,18 @@ public class Scene1 extends JPanel {
         g.fillRect(0, 0, d.width, d.height);
 
         g.setColor(Color.white);
-        g.drawString("FRAME: " + frame + " MAP Rows: "+ firstRowToShow + "," + lastRowToShow, 10, 10);
+        g.drawString("FRAME: " + frame, 10, 10);
 
         g.setColor(Color.green);
 
         if (inGame) {
 
-            // g.drawLine(0, GROUND,BOARD_WIDTH, GROUND);
-
-            // drawMap(g);
+            drawMap(g);  // Draw background stars first
             drawExplosions(g);
             drawPowreUps(g);
             drawAliens(g);
             drawPlayer(g);
             drawShot(g);
-            // drawBombing(g);
 
         } else {
 
@@ -330,25 +374,13 @@ public class Scene1 extends JPanel {
 
     private void update() {
 
-        // Start rendering map after frame 100
-        if (frame > 100) {
-           
-            lastRowToShow = (frame - 100) / BLOCKHEIGHT;
-            // rowsToDraw = MAP[lastRowToShow];
-
-            firstRowToShow = lastRowToShow - BLOCKS_TO_DRAW;
-            firstRowToShow = (firstRowToShow < 0) ? 0 : firstRowToShow;
-            System.out.println("BOARD_HEIGHT % BLOCKHEIGHT: " + BOARD_HEIGHT + "-"+BLOCKHEIGHT+"="+ BLOCKS_TO_DRAW);
-
-            // MAP[(frame-100) / 50]
-        }
 
         // Check enemy spawn
         // TODO this approach can only spawn one enemy at a frame
         SpawnDetails sd = spawnMap.get(frame);
         if (sd != null) {
             // Create a new enemy based on the spawn details
-            switch(sd.type) {
+            switch (sd.type) {
                 case "Alien1":
                     Enemy enemy = new Alien1(sd.x, sd.y);
                     enemies.add(enemy);
@@ -379,7 +411,7 @@ public class Scene1 extends JPanel {
         player.act();
 
         // Power-ups
-        for(PowerUp powerup : powerups) {
+        for (PowerUp powerup : powerups) {
             if (powerup.isVisible()) {
                 powerup.act();
                 if (powerup.collidesWith(player)) {
@@ -440,42 +472,30 @@ public class Scene1 extends JPanel {
 
         // enemies
         // for (Enemy enemy : enemies) {
-
         //     int x = enemy.getX();
-
         //     if (x >= BOARD_WIDTH - BORDER_RIGHT && direction != -1) {
-
         //         direction = -1;
-
         //         for (Enemy e2 : enemies) {
         //             e2.setY(e2.getY() + GO_DOWN);
         //         }
         //     }
-
         //     if (x <= BORDER_LEFT && direction != 1) {
-
         //         direction = 1;
-
         //         for (Enemy e : enemies) {
         //             e.setY(e.getY() + GO_DOWN);
         //         }
         //     }
         // }
-
         // for (Enemy enemy : enemies) {
         //     if (enemy.isVisible()) {
-
         //         int y = enemy.getY();
-
         //         if (y > GROUND - ALIEN_HEIGHT) {
         //             inGame = false;
         //             message = "Invasion!";
         //         }
-
         //         enemy.act(direction);
         //     }
         // }
-
         // bombs - collision detection
         // Bomb is with enemy, so it loops over enemies
         /*
@@ -515,8 +535,7 @@ public class Scene1 extends JPanel {
                 }
             }
         }
-        */
-    
+         */
     }
 
     private void doGameCycle() {
